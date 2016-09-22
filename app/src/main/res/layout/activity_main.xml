@@ -2,7 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
     <LinearLayout
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
@@ -11,6 +10,16 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_over"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:textColor="@color/red"
+        android:textSize="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
 
     <LinearLayout
         android:layout_above="@id/gv"
@@ -23,19 +32,19 @@
             android:orientation="horizontal"
             android:layout_weight="1">
             <TextView
-                android:textColor="@color/colorAccent"
+                android:textColor="@color/colorPrimary"
                 android:textSize="20dp"
                 android:text="还剩下"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <TextView
                 android:id="@+id/tv_num"
-                android:textColor="@color/colorAccent"
+                android:textColor="@color/colorPrimaryDark"
                 android:textSize="30dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <TextView
-                android:textColor="@color/colorAccent"
+                android:textColor="@color/colorPrimary"
                 android:textSize="20dp"
                 android:text="个雷"
                 android:layout_width="wrap_content"
@@ -47,14 +56,14 @@
             android:orientation="horizontal"
             android:layout_weight="1">
             <TextView
-                android:textColor="@color/colorAccent"
+                android:textColor="@color/colorPrimary"
                 android:textSize="20dp"
                 android:text="时间"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             <TextView
                 android:id="@+id/tv_time"
-                android:textColor="@color/colorAccent"
+                android:textColor="@color/colorPrimaryDark"
                 android:textSize="30dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -68,6 +77,18 @@
         <Button
             android:text="重玩"
             android:onClick="restart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <EditText
+            android:layout_weight="1"
+            android:id="@+id/et_num"
+            android:hint="请输入雷的个数"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="number"/>
+        <Button
+            android:onClick="zidiyi"
+            android:text="确定"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 

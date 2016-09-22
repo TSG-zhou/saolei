@@ -1,5 +1,8 @@
 package com.example.administrator.saolei;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -7,7 +10,10 @@ import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.view.View;
+import android.view.animation.AnimationSet;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private static int HANG = 19;
     private static int LIE = 14;
     private static int NUM = 30;//雷的个数
+    private int num =30;
     private LinearLayout gv;
     private LinearLayout[] ll = new LinearLayout[HANG];
     private static Block[][] bl = new Block[HANG][LIE];
@@ -32,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private static Timer timer1;
     private static Timer timer2;
     private static int time = 0;
+    private EditText et_num;
+    private static TextView tv_over;
 
     public static Handler handler = new Handler(){
         @Override
@@ -66,28 +75,27 @@ public class MainActivity extends AppCompatActivity {
                 int BLHANG = msg.arg1;
                 int BLLIE = msg.arg2;
                 int state = bl[BLHANG][BLLIE].getState();
-                System.out.println(BLHANG+"-"+BLLIE+"===="+state);
-
-                if (state == -1){
+                if (state == -1){//如果点到的方块为地雷
                     over();
                     bl[BLHANG][BLLIE].setImageResource(R.drawable.cklei);
                     bl[BLHANG][BLLIE].setFlag(false);
-                }else if (state == 0){
+                }else if (state == 0){//如果点到的方块为0.即空白
                     checkoverpa(BLHANG,BLLIE);
                     bl[BLHANG][BLLIE].setImageResource(FKNUM[state]);
                     bl[BLHANG][BLLIE].setFlag(false);
-                }else {
+                }else {//如果点到的不是空白
                     bl[BLHANG][BLLIE].setImageResource(FKNUM[state]);
                     bl[BLHANG][BLLIE].setFlag(false);
+                    checkvectory();
                 }
-            }else if (msg.what == 4){
+            }else if (msg.what == 4){//如果没有设置了旗帜，则受到将地雷的数量减一的消息
                 NUM--;
                 tv_num.setText(NUM+"");
-            }else if (msg.what == 5){
+            }else if (msg.what == 5){//如果设置了旗帜，则受到将地雷的数量加一的消息
                 NUM++;
                 tv_num.setText(NUM+"");
             }else if (msg.what == 6){
-                tv_time.setText(time+"");
+                tv_time.setText(time+"");//收到消息后，动态改变时间的值
             }
         }
     };
@@ -97,13 +105,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        et_num = (EditText) findViewById(R.id.et_num);
         tv_num = (TextView) findViewById(R.id.tv_num);
         tv_time = (TextView) findViewById(R.id.tv_time);
         tv_time.setText(time+"");
         tv_num.setText(NUM+"");
         gv = (LinearLayout) findViewById(R.id.gv);
+        tv_over = (TextView) findViewById(R.id.tv_over);
         create();
-
         timer1 = new Timer();
         timer2 = new Timer();
         timer1.schedule(new TimerTask() {
@@ -123,8 +132,9 @@ public class MainActivity extends AppCompatActivity {
         }, 0, 100);
 
     }
-    //重新开始游戏，重新加载所有的布局方块
-    public void restart(View v){
+    //开始游戏
+    public void start(){
+        tv_over.setText("");
         if (timer1 !=null){
             timer1.cancel();
             timer1 = null;
@@ -139,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         gv.removeAllViews();
         time = 0;
         GAME = 0;
-        NUM = 30;
+        NUM = num;
         tv_num.setText(NUM+"");
         tv_time.setText(time+"");
         timer1 = new Timer();
@@ -160,6 +170,10 @@ public class MainActivity extends AppCompatActivity {
             }
         },0,100);
         create();
+    }
+    //重新开始游戏，重新加载所有的布局方块
+    public void restart(View v){
+        start();
     }
     //加载所有的布局和方块
     public  void  create(){
@@ -278,14 +292,63 @@ public class MainActivity extends AppCompatActivity {
     }
     //游戏结束时将静态常量初始化
     private void cancel(){
+        if (timer1 != null){
+            timer1.cancel();
+        }
+        if (timer2 != null){
+            timer2.cancel();
+        }
+        tv_over.setText("");
+        time = 0;
         GAME = 0;
     }
+    //检查游戏是否胜利
+    private static void checkvectory(){
+        boolean flag = true ;
+        for (int i=0 ; i<HANG;i++){
+            for (int j=0 ; j<LIE;j++){
+                if (bl[i][j].isFlag() && bl[i][j].getState() != -1){//如果方块未设置图案，并且方块的数值不为地雷
+                    flag = false;
+                    if (!flag){
+                        return;
+                    }
+                }
+            }
+        }
+        if (flag){
+            tv_over.setText("you win");
+            ObjectAnimator oa = ObjectAnimator.ofFloat(tv_over,"scaleX",1,3);
+            oa.setDuration(2000);
+            oa.start();
+            over();
+        }
+    }
+    //添加自定义雷数的方法
+    public void zidiyi(View v){
+        String strnum = et_num.getText().toString();
+        int rlnum;
+        if (TextUtils.isEmpty(strnum)) {
+            Toast.makeText(this,"请设置数量",Toast.LENGTH_SHORT).show();
+            return;
+        }
+        rlnum = Integer.parseInt(strnum);
+        if (rlnum > HANG*LIE){
+            Toast.makeText(this,"设置的雷的个数过多",Toast.LENGTH_SHORT).show();
+            rlnum = 200;
+        }
+        if (rlnum < 10){
+            Toast.makeText(this,"设置的雷的个数太少",Toast.LENGTH_SHORT).show();
+            rlnum = 10;
+        }
+        et_num.setText("");
+        Toast.makeText(this,"设置成功",Toast.LENGTH_SHORT).show();
+        num = rlnum;
+        start();
 
+    }
     @Override
     protected void onDestroy() {
         cancel();
         super.onDestroy();
     }
-
-
 }
